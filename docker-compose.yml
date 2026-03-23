@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: transcriptor-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NODE_ENV=production
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    networks:
+      - transcriptor-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: transcriptor-frontend
+    ports:
+      - "80:80"
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - transcriptor-network
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+
+networks:
+  transcriptor-network:
+    driver: bridge

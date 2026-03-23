@@ -1,0 +1,26 @@
+# Backend Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar package.json
+COPY backend/package*.json ./
+
+# Instalar dependencias
+RUN npm ci
+
+# Copiar código fuente
+COPY backend/src ./src
+COPY backend/tsconfig.json .
+
+# Compilar TypeScript
+RUN npm run build
+
+# Crear directorio para datos
+RUN mkdir -p ./data ./uploads
+
+# Exponer puerto
+EXPOSE 5000
+
+# Iniciar aplicación
+CMD ["npm", "start"]
